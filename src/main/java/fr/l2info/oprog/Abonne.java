@@ -23,6 +23,7 @@ public class Abonne {
      * @throws IncorrectNameException si le nom de l'abonné n'est pas correct.
      */
     public Abonne(String nom) throws IncorrectNameException {
+        if(nom == null) throw new IncorrectNameException();
         nom = nom.strip();
         if(!isAlpha(nom)) {
             throw new IncorrectNameException();
@@ -127,6 +128,7 @@ public class Abonne {
     // Posted by adarshr
     // Retrieved 2026-02-04, License - CC BY-SA 2.5
     private boolean isAlpha(String name) {
+        if(name.isEmpty()) return false;
         return name.matches("[a-zA-Z- ]+");
     }
 

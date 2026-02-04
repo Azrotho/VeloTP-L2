@@ -48,6 +48,16 @@ public class AbonneTest {
         Abonne a = new Abonne("Jean-Louis Michel");
     }
 
+    @Test(expected = IncorrectNameException.class)
+    public void testNomNull() throws IncorrectNameException {
+        Abonne a = new Abonne(null);
+    }
+
+    @Test(expected = IncorrectNameException.class)
+    public void testNomVide() throws IncorrectNameException {
+        Abonne a = new Abonne("");
+    }
+
     @Test
     public void testNomWithRibCheckName() throws IncorrectNameException {
         Abonne a = new Abonne("Fred", "12345-12345-01234567890-06"); // Rib Valide
