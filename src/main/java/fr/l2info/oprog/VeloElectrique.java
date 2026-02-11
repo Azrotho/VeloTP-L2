@@ -13,7 +13,7 @@ public class VeloElectrique extends Velo {
         sb.append("Vélo ");
         sb.append("électrique");
         sb.append(" - ");
-        sb.append(String.format("%.2f", super.kilometrage()));
+        sb.append(String.format("%.1f", super.kilometrage()));
         sb.append(" km");
         if((this.prochaineRevision() <= 0)) {
             sb.append(" (révision nécessaire)");
