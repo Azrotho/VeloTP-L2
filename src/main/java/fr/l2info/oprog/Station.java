@@ -33,78 +33,126 @@ public class Station {
     }
 
     public Velo veloALaBorne(int b) {
-        if(b > capacite) return null;
-        if(b <= 0) return null;
-        return bornes[b-1];
+        if (b > capacite)
+            return null;
+        if (b <= 0)
+            return null;
+        return bornes[b - 1];
     }
 
     public int nbBornesLibres() {
         int count = 0;
-        for(int i = 0; i < capacite; i++) {
-            if(bornes[i] == null) {
+        for (int i = 0; i < capacite; i++) {
+            if (bornes[i] == null) {
                 count++;
             }
         }
         return count;
     }
 
-    public Velo emprunterVelo(Abonne a, int b){
-        if(registre == null) return null;
-        if(a.estBloque()) return null;
-        if(b > capacite) return null;
-        if(b <= 0) return null;
-        if(bornes[b-1] == null) return null;
-        Velo veloaemprunter = bornes[b-1];
+    public Velo emprunterVelo(Abonne a, int b) {
+        if (registre == null)
+            return null;
+        if (a.estBloque())
+            return null;
+        if (b > capacite)
+            return null;
+        if (b <= 0)
+            return null;
+        if (bornes[b - 1] == null)
+            return null;
+        Velo veloaemprunter = bornes[b - 1];
         int resultDecro = veloaemprunter.decrocher();
-        if(resultDecro != 0) return null;
+        if (resultDecro != 0)
+            return null;
         int result = registre.emprunter(a, veloaemprunter, maintenant());
-        if(result != 0) return null;
-        bornes[b-1] = null;
+        if (result != 0)
+            return null;
+        bornes[b - 1] = null;
         return veloaemprunter;
     }
 
     public int arrimerVelo(Velo v, int b) {
-        if(v == null) return -1;
-        if(b > capacite) return -1;
-        if(b <= 0) return -1;
+        if (v == null)
+            return -1;
+        if (b > capacite)
+            return -1;
+        if (b <= 0)
+            return -1;
 
-        if(registre == null) return -2;
-        if(bornes[b-1] != null) return -2;
+        if (registre == null)
+            return -2;
+        if (bornes[b - 1] != null)
+            return -2;
 
         int result = v.arrimer();
-        if(result != 0) return -3;
+        if (result != 0)
+            return -3;
 
         result = registre.retourner(v, maintenant());
-        if(result != 0) return -4;
+        if (result != 0)
+            return -4;
 
-        bornes[b-1] = v;
+        bornes[b - 1] = v;
         return 0;
     }
 
     public void equilibrer(Set<Velo> velos) {
         int moitie = (int) Math.ceil(((double) capacite) / 2.0d);
-        for(int i = 0; i < capacite; i++) {
+        for (int i = 0; i < capacite; i++) {
             Velo v = bornes[i];
-            if (v.estAbime() || v.prochaineRevision() <= 0.0d) {
+            if (v != null && (v.estAbime() || v.prochaineRevision() <= 0.0d)) {
                 velos.add(v);
                 bornes[i] = null;
             }
         }
         int counter = 0;
-        while(capacite - nbBornesLibres() > moitie) {
-            Velo v = bornes[counter];
-            velos.add(v);
-            bornes[counter] = null;
+        while (capacite - nbBornesLibres() > moitie) {
+            if (bornes[counter] != null) {
+                velos.add(bornes[counter]);
+                bornes[counter] = null;
+            }
+            counter++;
         }
 
-        long nbvelosneuf = velos.stream().filter(velo -> {
+        int nbvelosneuf = (int) velos.stream().filter(velo -> {
             return !velo.estAbime() && velo.prochaineRevision() > 0.0d;
         }).count();
 
-        long nbveloreviser = nbvelosneuf - velos.stream().filter(velo -> {
-            return !velo.estAbime();
-        }).count();
+        int nbAReviser = (int) (velos.stream().filter(velo -> {
+            return !velo.estAbime() && velo.prochaineRevision() <= 0.0d;
+        }).count());
 
+        int manquants = moitie - (capacite - nbBornesLibres());
+        int nbReintegrer = Math.max(0, manquants - (int) nbvelosneuf);
+        nbReintegrer = Math.min(nbReintegrer, nbAReviser);
+
+        for (int i = 0; i < capacite && nbReintegrer > 0; i++) {
+            if (bornes[i] == null) {
+                Velo vReviser = velos.stream().filter(velo -> !velo.estAbime() && velo.prochaineRevision() <= 0.0d)
+                        .findFirst().orElse(null);
+                if (vReviser == null)
+                    break;
+                velos.remove(vReviser);
+                vReviser.arrimer();
+                bornes[i] = vReviser;
+                nbReintegrer--;
+            }
+        }
+
+        for (int i = 0; i < capacite; i++) {
+            if (capacite - nbBornesLibres() >= moitie)
+                break;
+            if (bornes[i] != null)
+                continue;
+            Velo remplacement = velos.stream().filter(velo -> !velo.estAbime() && velo.prochaineRevision() > 0.0d)
+                    .findFirst().orElse(null);
+            if (remplacement == null)
+                break;
+            velos.remove(remplacement);
+            remplacement.arrimer();
+            bornes[i] = remplacement;
+        }
 
     }
 
@@ -115,6 +163,5 @@ public class Station {
     public long maintenant() {
         return System.currentTimeMillis();
     }
-
 
 }

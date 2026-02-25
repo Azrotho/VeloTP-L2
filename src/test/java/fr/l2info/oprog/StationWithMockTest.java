@@ -8,6 +8,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class StationWithMockTest {
+
+    @Test
+    public void testCreeStation() {
+        Station s = new Station("Feur Station", 4,4, 42);
+        Assert.assertEquals("Feur Station", s.getNom());
+    }
+
     @Test
     public void testArimerAbonne() {
         Abonne mockAbonne = Mockito.mock(Abonne.class);
