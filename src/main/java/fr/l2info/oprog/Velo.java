@@ -107,7 +107,7 @@ public abstract class Velo {
      * Permet de réparer un vélo. La réparation s'effectue sur un vélo abimé qui n'est pas accroché.
      * @return  0 si le vélo a pu être réparé,
      *          -1 si le vélo est accroché,
-     *          -2 si le vélo est décroché, mais qu'il n'est pas abimé.
+     *          -2 si le vélo est décroché, mais qu'il n'est pas abimé.è
      */
     public int reparer() {
         if(estDecroche) {
