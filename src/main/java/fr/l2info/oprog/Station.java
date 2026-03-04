@@ -90,10 +90,10 @@ public class Station {
             return -3;
 
         result = registre.retourner(v, maintenant());
+        bornes[b - 1] = v;
         if (result != 0)
             return -4;
 
-        bornes[b - 1] = v;
         return 0;
     }
 
@@ -115,19 +115,22 @@ public class Station {
             counter++;
         }
 
-        int nbvelosneuf = (int) velos.stream().filter(velo -> {
-            return !velo.estAbime() && velo.prochaineRevision() > 0.0d;
-        }).count();
+        int nbvelosneuf = (int) velos
+                .stream()
+                .filter(velo -> {
+                    return !velo.estAbime() && velo.prochaineRevision() > 0.0d;
+                })
+                .count();
 
-        int nbAReviser = (int) (velos.stream().filter(velo -> {
+        int nbareviser = (int) (velos.stream().filter(velo -> {
             return !velo.estAbime() && velo.prochaineRevision() <= 0.0d;
         }).count());
 
         int manquants = moitie - (capacite - nbBornesLibres());
-        int nbReintegrer = Math.max(0, manquants - (int) nbvelosneuf);
-        nbReintegrer = Math.min(nbReintegrer, nbAReviser);
+        int nbreintegrer = Math.max(0, manquants - (int) nbvelosneuf);
+        nbreintegrer = Math.min(nbreintegrer, nbareviser);
 
-        for (int i = 0; i < capacite && nbReintegrer > 0; i++) {
+        for (int i = 0; i < capacite && nbreintegrer > 0; i++) {
             if (bornes[i] == null) {
                 Velo vReviser = velos.stream().filter(velo -> !velo.estAbime() && velo.prochaineRevision() <= 0.0d)
                         .findFirst().orElse(null);
@@ -136,7 +139,7 @@ public class Station {
                 velos.remove(vReviser);
                 vReviser.arrimer();
                 bornes[i] = vReviser;
-                nbReintegrer--;
+                nbreintegrer--;
             }
         }
 
@@ -157,7 +160,17 @@ public class Station {
     }
 
     public double distance(Station s) {
-        return 0.0d;
+        double radius = 6371;
+        double lat1 = Math.toRadians(this.latitude);
+        double lat2 = Math.toRadians(s.latitude);
+        double o = lat2 - lat1;
+        double lambda = Math.toRadians(s.longitude - this.longitude);
+
+        double a = Math.sin(o/2.0d) * Math.sin(o/2.0d) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(lambda/2.0d) * Math.sin(lambda/2.0d);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+        return radius * c;
     }
 
     public long maintenant() {
