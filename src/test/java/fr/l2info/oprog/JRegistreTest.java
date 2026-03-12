@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 public class JRegistreTest {
 
     Abonne[] abonnes = new Abonne[2];
@@ -16,11 +15,10 @@ public class JRegistreTest {
 
     Station station;
 
-
-    @Before     // méthode exécutée avant chaque test
+    @Before
     public void setup() throws IncorrectNameException {
-        Abonne abonne = new Abonne("IHUQSDFGHUDUYFDSUFHDSHJDSFKJDSHFJIDSHDSH", "12345-12345-01234567890-06"); // Abonnee valide
-        Abonne abonneRibInvalide = new Abonne("IHUQSDFGHUDUYFDSUFHDSHJDSFKJDSHFJIDSHDSH"); // Abonnee RIB Invalide
+        Abonne abonne = new Abonne("IHUQSDFGHUDUYFDSUFHDSHJDSFKJDSHFJIDSHDSH", "12345-12345-01234567890-06");
+        Abonne abonneRibInvalide = new Abonne("IHUQSDFGHUDUYFDSUFHDSHJDSFKJDSHFJIDSHDSH");
 
         VeloMusculaire vmNeuf = new VeloMusculaire();
         VeloMusculaire vmAbimer = new VeloMusculaire();
@@ -62,7 +60,7 @@ public class JRegistreTest {
         abonnes[0] = abonne;
         abonnes[1] = abonneRibInvalide;
 
-        station = new Station("Feur Station", 4,4, 42); // Station valide
+        station = new Station("Feur Station", 4, 4, 42); // Station valide
     }
 
     @Test
@@ -80,7 +78,7 @@ public class JRegistreTest {
     public void arrimerVeloStationTest() {
         JRegistre jRegistre = new JRegistre();
         station.setRegistre(jRegistre);
-        VeloMusculaire vm  = (VeloMusculaire) velos.get(Velos.VM_NEUF);
+        VeloMusculaire vm = (VeloMusculaire) velos.get(Velos.VM_NEUF);
         int result = station.arrimerVelo(vm, 1);
         Assert.assertEquals(-4, result);
         Assert.assertNotEquals(null, station.veloALaBorne(1));
@@ -90,7 +88,7 @@ public class JRegistreTest {
     public void emprunterVeloStationTest() {
         JRegistre jRegistre = new JRegistre();
         station.setRegistre(jRegistre);
-        VeloMusculaire vm  = (VeloMusculaire) velos.get(Velos.VM_NEUF);
+        VeloMusculaire vm = (VeloMusculaire) velos.get(Velos.VM_NEUF);
         int result = station.arrimerVelo(vm, 1);
         Assert.assertEquals(-4, result);
         Assert.assertNotEquals(null, station.veloALaBorne(1));
@@ -104,7 +102,7 @@ public class JRegistreTest {
     public void emprunterVeloStationAbonneBloquerTest() {
         JRegistre jRegistre = new JRegistre();
         station.setRegistre(jRegistre);
-        VeloMusculaire vm  = (VeloMusculaire) velos.get(Velos.VM_NEUF);
+        VeloMusculaire vm = (VeloMusculaire) velos.get(Velos.VM_NEUF);
         int result = station.arrimerVelo(vm, 1);
         Assert.assertEquals(-4, result);
         Assert.assertNotEquals(null, station.veloALaBorne(1));
@@ -118,7 +116,7 @@ public class JRegistreTest {
     public void emprunter2foisVeloStationAbonneTest() {
         JRegistre jRegistre = new JRegistre();
         station.setRegistre(jRegistre);
-        VeloMusculaire vm  = (VeloMusculaire) velos.get(Velos.VM_NEUF);
+        VeloMusculaire vm = (VeloMusculaire) velos.get(Velos.VM_NEUF);
         VeloMusculaire vm2 = (VeloMusculaire) velos.get(Velos.VM_NEUF_A);
         int result = station.arrimerVelo(vm, 1);
         Assert.assertEquals(-4, result);
@@ -126,12 +124,11 @@ public class JRegistreTest {
         Assert.assertEquals(-4, result);
         Assert.assertNotEquals(null, station.veloALaBorne(1));
 
-        // une fois le vélo à la borne
         Velo velo = station.emprunterVelo(abonnes[0], 1);
         Assert.assertNotEquals(null, velo);
 
         velo = station.emprunterVelo(abonnes[0], 2);
-        Assert.assertNotEquals(null, velo);
+        Assert.assertEquals(null, velo);
     }
 
     @Test
@@ -170,8 +167,20 @@ public class JRegistreTest {
         Assert.assertEquals(0, result);
         result = jRegistre.retourner(veloMusculaire, station.maintenant() + 5);
         Assert.assertEquals(0, result);
-        result = jRegistre.emprunter(abonnes[0], veloMusculaire, station.maintenant()+ 10);
+        result = jRegistre.emprunter(abonnes[0], veloMusculaire, station.maintenant() + 10);
         Assert.assertEquals(0, result);
+    }
+
+    @Test
+    public void testEprunterUnVeloPuisRendrePuisEmprunterDansLePasse() {
+        JRegistre jRegistre = new JRegistre();
+        Velo veloMusculaire = velos.get(Velos.VM_NEUF);
+        int result = jRegistre.emprunter(abonnes[0], veloMusculaire, station.maintenant());
+        Assert.assertEquals(0, result);
+        result = jRegistre.retourner(veloMusculaire, station.maintenant() + 15);
+        Assert.assertEquals(0, result);
+        result = jRegistre.emprunter(abonnes[0], veloMusculaire, station.maintenant() + 10);
+        Assert.assertEquals(-2, result);
     }
 
     @Test
@@ -222,12 +231,153 @@ public class JRegistreTest {
     public void testEmpruntsEnCoursWithEmpruntRendu() {
         JRegistre jRegistre = new JRegistre();
         jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
-        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant()+5);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
         int result = jRegistre.nbEmpruntsEnCours(abonnes[0]);
         Assert.assertEquals(0, result);
     }
 
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRendu() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 25);
+        Assert.assertEquals(0, result);
+    }
 
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRendu() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 22);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 25);
+        Assert.assertEquals(-2, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche1() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant());
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche2() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche3() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 4);
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche4() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 19);
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche5() {
+        JRegistre jRegistre = new JRegistre();
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant());
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 10);
+        jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], velos.get(Velos.VM_NEUF), station.maintenant() + 20);
+        int result = jRegistre.retourner(velos.get(Velos.VM_NEUF), station.maintenant() - 7);
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche6() {
+        JRegistre jRegistre = new JRegistre();
+        Velo vm1 = velos.get(Velos.VM_NEUF);
+        jRegistre.emprunter(abonnes[0], vm1, station.maintenant());
+        jRegistre.retourner(vm1, station.maintenant() + 5);
+        jRegistre.emprunter(abonnes[0], vm1, station.maintenant() + 10);
+        int result = jRegistre.retourner(vm1, station.maintenant() + 20);
+        Assert.assertEquals(0, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche7() {
+        JRegistre jRegistre = new JRegistre();
+        Velo vm = velos.get(Velos.VM_NEUF);
+        jRegistre.emprunter(abonnes[0], vm, station.maintenant() + 10);
+        jRegistre.retourner(vm, station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], vm, station.maintenant() + 3);
+        int result = jRegistre.retourner(vm, station.maintenant() + 20);
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testRetourWithEmpruntRenduEmpruntRenduRenduChevauche8() {
+        JRegistre jRegistre = new JRegistre();
+        Velo vm = velos.get(Velos.VM_NEUF);
+        jRegistre.emprunter(abonnes[0], vm, station.maintenant() + 10);
+        jRegistre.retourner(vm, station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], vm, station.maintenant() + 3);
+        int result = jRegistre.retourner(vm, station.maintenant() + 14);
+        Assert.assertEquals(-3, result);
+    }
+
+    @Test
+    public void testplop() {
+        JRegistre jRegistre = new JRegistre();
+        Velo vm = velos.get(Velos.VM_NEUF);
+        jRegistre.emprunter(abonnes[0], vm, station.maintenant() + 10);
+        jRegistre.retourner(vm, station.maintenant() + 15);
+        jRegistre.emprunter(abonnes[0], vm, station.maintenant() + 3);
+        int result = jRegistre.retourner(vm, station.maintenant() + 8);
+        Assert.assertEquals(0, result);
+    }
+
+    @Test
+    public void testFacturation() {
+        JRegistre jRegistre = new JRegistre();
+        Velo vm = velos.get(Velos.VM_NEUF);
+        long maintenant = station.maintenant();
+        long debutEmprunt = maintenant - 3600000;
+        long finEmprunt = maintenant;
+        jRegistre.emprunter(abonnes[0], vm, debutEmprunt);
+        jRegistre.retourner(vm, finEmprunt);
+        jRegistre.emprunter(abonnes[0], vm, maintenant + 1000);
+        double result = jRegistre.facturation(abonnes[0], debutEmprunt - 1000, finEmprunt + 1000);
+        Assert.assertEquals(2.0d, result, 0.001d);
+    }
 
     public enum Velos {
         VM_NEUF,
@@ -245,6 +395,4 @@ public class JRegistreTest {
 
     }
 
-
 }
-
