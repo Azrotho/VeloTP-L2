@@ -8,17 +8,6 @@ import org.junit.Test;
 public class VeloTest {
 
     public static final double DELTA = 0.001d;
-
-    @Before     // méthode exécutée avant chaque test
-    public void setup() {
-        System.out.println("Execution du setup");
-    }
-
-    @After     // méthode exécutée après chaque test
-    public void teardown() {
-        System.out.println("Execution du teardown");
-    }
-
     @Test
     public void testVeloMusculaire() {
         VeloMusculaire vm = new VeloMusculaire();
