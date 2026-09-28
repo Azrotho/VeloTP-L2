@@ -366,6 +366,20 @@ public class JRegistreTest {
     }
 
     @Test
+    public void testRetourSansDeclencherConditionDStrictementSuperieurFin() {
+        JRegistre jRegistre = new JRegistre();
+        Velo vm = velos.get(Velos.VM_NEUF);
+
+        long t0 = station.maintenant();
+        jRegistre.emprunter(abonnes[0], vm, t0 + 10);
+        jRegistre.retourner(vm, t0 + 15);
+        jRegistre.emprunter(abonnes[0], vm, t0 + 3);
+
+        int result = jRegistre.retourner(vm, t0 + 8);
+        Assert.assertEquals(0, result);
+    }
+
+    @Test
     public void testFacturation() {
         JRegistre jRegistre = new JRegistre();
         Velo vm = velos.get(Velos.VM_NEUF);

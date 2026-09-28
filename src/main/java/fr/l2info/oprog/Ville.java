@@ -2,7 +2,6 @@ package fr.l2info.oprog;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.chrono.JapaneseEra;
 import java.util.*;
 
 /**
@@ -77,7 +76,9 @@ public class Ville {
      */
     public void entretenirVelos() {
         velosStock.stream().filter(Velo::estAbime).forEach(Velo::reparer);
-        velosStock.stream().filter(velo -> velo.prochaineRevision() <= 0.0d).forEach(Velo::reviser);
+        velosStock.stream()
+                .filter(velo -> velo.estAbime() || velo.prochaineRevision() <= 0.0d)
+                .forEach(Velo::reviser);
     }
 
     /**
@@ -108,7 +109,7 @@ public class Ville {
         for(int i = 0; i < nbVM; i++) {
             Velo veloM = velosStock.stream()
                     .filter(velo -> !velo.estAbime())
-                    .filter(velo -> velo.prochaineRevision() <= 0d)
+                    .filter(velo -> velo.prochaineRevision() > 0d)
                     .filter(velo -> velo instanceof VeloMusculaire)
                     .findFirst()
                     .orElse(null);
@@ -121,7 +122,7 @@ public class Ville {
         for(int i = 0; i < nbVE; i++) {
             Velo veloE = velosStock.stream()
                     .filter(velo -> !velo.estAbime())
-                    .filter(velo -> velo.prochaineRevision() <= 0d)
+                    .filter(velo -> velo.prochaineRevision() > 0d)
                     .filter(velo -> velo instanceof VeloElectrique)
                     .findFirst()
                     .orElse(null);
@@ -228,8 +229,9 @@ public class Ville {
         Map<Abonne, Double> facturer = new HashMap<>();
         // Considéré les emprunts du premier jour du mois à 0h00 pile jusqu'au dernier jour du mois à 23h59
         Calendar dateDebut = GregorianCalendar.getInstance();
+        dateDebut.clear();
         dateDebut.set(Calendar.YEAR, annee);
-        dateDebut.set(Calendar.MONTH, mois);
+        dateDebut.set(Calendar.MONTH, mois - 1);
         dateDebut.set(Calendar.DAY_OF_MONTH, 1);
         dateDebut.set(Calendar.HOUR_OF_DAY, 0);
         dateDebut.set(Calendar.MINUTE, 0);
@@ -237,10 +239,11 @@ public class Ville {
         dateDebut.set(Calendar.MILLISECOND, 0);
 
         Calendar dateFin = GregorianCalendar.getInstance();
+        dateFin.clear();
         dateFin.set(Calendar.YEAR, annee);
-        dateFin.set(Calendar.MONTH, mois);
-        dateFin.set(Calendar.DAY_OF_MONTH, dateFin.getMaximum(Calendar.DAY_OF_MONTH));
-        dateFin.set(Calendar.HOUR_OF_DAY, dateFin.getMaximum(Calendar.HOUR_OF_DAY));
+        dateFin.set(Calendar.MONTH, mois - 1);
+        dateFin.set(Calendar.DAY_OF_MONTH, dateFin.getActualMaximum(Calendar.DAY_OF_MONTH));
+        dateFin.set(Calendar.HOUR_OF_DAY, 23);
         dateFin.set(Calendar.MINUTE, 59);
         dateFin.set(Calendar.SECOND, 59);
         dateFin.set(Calendar.MILLISECOND, 999);
@@ -250,7 +253,7 @@ public class Ville {
                 .forEach(abonne -> facturer.put(abonne, jRegistre.facturation(abonne, dateDebut.getTimeInMillis(), dateFin.getTimeInMillis())));
 
 
-        return null;
+        return facturer;
     }
 
     /**
