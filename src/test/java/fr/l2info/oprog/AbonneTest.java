@@ -10,16 +10,6 @@ import org.junit.Test;
  */
 public class AbonneTest {
 
-    @Before     // méthode exécutée avant chaque test
-    public void setup() {
-        System.out.println("Execution du setup");
-    }
-
-    @After     // méthode exécutée après chaque test
-    public void teardown() {
-        System.out.println("Execution du teardown");
-    }
-
     @Test
     public void testNom() throws IncorrectNameException {
         // création d'un nouvel abonné

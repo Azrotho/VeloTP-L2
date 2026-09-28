@@ -53,9 +53,14 @@ public class Station {
     public Velo emprunterVelo(Abonne a, int b) {
         if (registre == null)
             return null;
+        if (a == null)
+            return null;
         if (a.estBloque())
             return null;
+        if (registre.nbEmpruntsEnCours(a) > 0)
+            return null;
         if (b > capacite)
+
             return null;
         if (b <= 0)
             return null;
@@ -98,6 +103,8 @@ public class Station {
     }
 
     public void equilibrer(Set<Velo> velos) {
+        if (velos == null)
+            return;
         int moitie = (int) Math.ceil(((double) capacite) / 2.0d);
         for (int i = 0; i < capacite; i++) {
             Velo v = bornes[i];
@@ -118,12 +125,12 @@ public class Station {
         int nbvelosneuf = (int) velos
                 .stream()
                 .filter(velo -> {
-                    return !velo.estAbime() && velo.prochaineRevision() > 0.0d;
+                    return velo != null && !velo.estAbime() && velo.prochaineRevision() > 0.0d;
                 })
                 .count();
 
         int nbareviser = (int) (velos.stream().filter(velo -> {
-            return !velo.estAbime() && velo.prochaineRevision() <= 0.0d;
+            return velo != null && !velo.estAbime() && velo.prochaineRevision() <= 0.0d;
         }).count());
 
         int manquants = moitie - (capacite - nbBornesLibres());
@@ -132,7 +139,8 @@ public class Station {
 
         for (int i = 0; i < capacite && nbreintegrer > 0; i++) {
             if (bornes[i] == null) {
-                Velo vReviser = velos.stream().filter(velo -> !velo.estAbime() && velo.prochaineRevision() <= 0.0d)
+                Velo vReviser = velos.stream()
+                        .filter(velo -> velo != null && !velo.estAbime() && velo.prochaineRevision() <= 0.0d)
                         .findFirst().orElse(null);
                 if (vReviser == null)
                     break;
@@ -148,7 +156,8 @@ public class Station {
                 break;
             if (bornes[i] != null)
                 continue;
-            Velo remplacement = velos.stream().filter(velo -> !velo.estAbime() && velo.prochaineRevision() > 0.0d)
+            Velo remplacement = velos.stream()
+                    .filter(velo -> velo != null && !velo.estAbime() && velo.prochaineRevision() > 0.0d)
                     .findFirst().orElse(null);
             if (remplacement == null)
                 break;
@@ -166,9 +175,10 @@ public class Station {
         double o = lat2 - lat1;
         double lambda = Math.toRadians(s.longitude - this.longitude);
 
-        double a = Math.sin(o/2.0d) * Math.sin(o/2.0d) + Math.cos(lat1) * Math.cos(lat2) * Math.sin(lambda/2.0d) * Math.sin(lambda/2.0d);
+        double a = Math.sin(o / 2.0d) * Math.sin(o / 2.0d)
+                + Math.cos(lat1) * Math.cos(lat2) * Math.sin(lambda / 2.0d) * Math.sin(lambda / 2.0d);
 
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         return radius * c;
     }
