@@ -37,5 +37,7 @@ build/
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
-.DS_Store
+# Archives locales non versionnées
+*.zip
+csv.zip
+src/main/resources/data.zip
